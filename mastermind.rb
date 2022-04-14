@@ -27,3 +27,4 @@ puts "Welcome to Mastermind"
 puts "=====================\n"
 
 puts rules
+# test
