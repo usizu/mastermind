@@ -1,4 +1,5 @@
 # Methods
+# ======================================================
 
 def welcome_message
   puts "\n"
@@ -7,54 +8,30 @@ def welcome_message
   puts $rules
 end
 
-def code_generate
-  $code = []
-  4.times do
-    $code << [1,2,3,4,5,6].sample
-  end
-  return $code
+def display_peg_colour_numbers
+  "#{$peg[1]} #{$peg[2]} #{$peg[3]} #{$peg[4]} #{$peg[5]} #{$peg[6]}"
 end
 
-def code_display
-  code_string = ""
-
-  $code.each do |x|
-    string = " #{x.to_s} "
-    case x
-    when 1
-      code_string << string.bg_red << " "
-    when 2
-      code_string << string.bg_green << " "
-    when 3
-      code_string << string.bg_brown << " "
-    when 4
-      code_string << string.bg_blue << " "
-    when 5
-      code_string << string.bg_magenta << " "
-    when 6
-      code_string << string.bg_cyan << " "
-    end
-  end
-
-  puts "Code: #{code_string}"
+def display_code
+  "[ #{$peg[$code[0]]} #{$peg[$code[1]]} #{$peg[$code[2]]} #{$peg[$code[3]]} ]"
 end
 
 def player_get_choice
   puts "\nPlay as Code Breaker or Code Maker?"
   puts "Press a key: [1: Maker] [2: Breaker]"
   
-  player_choice = gets.chomp.to_i
+  player_choice = gets.chomp
   
-  if player_choice == 1
+  if player_choice == '1' || player_choice == "" || player_choice == " "
     puts "You choose Code Maker."
-    $you = Code_Maker.new("player")
+    $human = Code_Maker.new("human")
     $computer = Code_Breaker.new("computer")
-    $player = {maker: $you, breaker: $computer}
-  elsif player_choice == 2
+    $player = {maker: $human, breaker: $computer}
+  elsif player_choice == '2'
     puts "You choose Code Breaker."
-    $you = Code_Breaker.new("player")
+    $human = Code_Breaker.new("human")
     $computer = Code_Maker.new("computer")
-    $player = {maker: $computer, breaker: $you}
+    $player = {maker: $computer, breaker: $human}
   else
     puts "\nInvalid key, please try again."
     player_get_choice
@@ -68,13 +45,21 @@ def player_set_turns
     choice = gets.chomp
 
     if choice == " " || choice == ""
-      $guesses = 12
+      $number_of_turns = 12
       break
     elsif choice != '6' && choice != '8' && choice != '10' && choice != '12'
       puts "\nInvalid input, please try again"
     else
-      $guesses = choice.to_i
+      $number_of_turns = choice.to_i
       break
     end
+  end
+  build_game_array
+end
+
+def build_game_array
+  row = "[ ___ ___ ___ ___ ]"
+  $number_of_turns.times do
+    $game_array << row
   end
 end
