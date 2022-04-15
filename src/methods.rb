@@ -8,12 +8,22 @@ def welcome_message
   puts $rules
 end
 
+def code_generate_randomly
+  code = []
+  4.times { code << Random.new.rand(1..6) }
+  code
+end
+
 def display_peg_colour_numbers
   "#{$peg[1]} #{$peg[2]} #{$peg[3]} #{$peg[4]} #{$peg[5]} #{$peg[6]}"
 end
 
-def display_code
-  "[ #{$peg[$code[0]]} #{$peg[$code[1]]} #{$peg[$code[2]]} #{$peg[$code[3]]} ]"
+def display_code(code = $code)
+  "[ #{$peg[code[0]]} #{$peg[code[1]]} #{$peg[code[2]]} #{$peg[code[3]]} ]"
+end
+
+def compare_code_to_guess(guess)
+  return true if $player[:breaker].guess == $code
 end
 
 def player_get_choice

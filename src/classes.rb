@@ -14,7 +14,7 @@ class String
   def cyan;           "\e[36m#{self}\e[0m" end
   def gray;           "\e[37m#{self}\e[0m" end
 
-  def bg_black;       "\e[40m#{self.black}\e[0m" end
+  def bg_black;       "\e[40m#{self.gray}\e[0m" end
   def bg_red;         "\e[41m#{self.black}\e[0m" end
   def bg_green;       "\e[42m#{self.black}\e[0m" end
   def bg_brown;       "\e[43m#{self.black}\e[0m" end
@@ -30,16 +30,10 @@ class String
   def reverse_color;  "\e[7m#{self}\e[27m" end
 end
 
-# [] game_array should be of length of number_of_turns
-# [] print game_array to show how many turns are left
-
-# [] generate random guess
-# [] check guess with code
-# [] generate black/white peg feedback
-# [] each turn, the guesses and feedback are added to a
-#   parent array, and displayed in sequence
-
 class Code_Maker
+
+  attr_reader :feedback_pegs
+
   def initialize(type)
     @type = type
   end
@@ -47,16 +41,62 @@ class Code_Maker
   def make_code
     puts "Making code..."
     if @type == "computer"
-      code_generate_randomly
+      $code = code_generate_randomly
       puts "The Code: #{display_code}"
     elsif @type == "human"
-      code_generate_choice
+      $code = code_generate_choice
       puts "Your Code: #{display_code}"
     end
   end
 
-  def code_generate_randomly
-    4.times { $code << Random.new.rand(1..6) }
+  def set_pegs
+    # human:
+      # tells you how many pegs of each colour to put
+      # saves these in an array
+      # prompts you to set them out
+        # can they be set in any order?
+      # each one you put, pops one off the array
+      # method ends when array is empty
+      # then a method shows the pegs on the board
+    # computer:
+      # counts the correct pegs to do, then does them
+
+    # peg rules:
+      # 2 kinds of peg: black and white
+      # 1 black peg for correct colour+position
+      # 1 white peg for correct colour in wrong position
+      # pegs are given for each correct guess
+
+    # check_pegs method
+    #  returns how many pegs of each type should be set
+    check_pegs
+    puts "Peg check: #{display_code(@feedback_pegs)}"
+  end
+
+  def check_pegs
+    @feedback_pegs = []
+    @guess = $player[:breaker].guess
+
+    # black pegs
+    @guess.each_with_index do |colour, position|
+      puts "colour: #{colour} | pos: #{position}"
+      if $code[position] == colour
+        puts "match (#{position})"
+        @feedback_pegs << :black
+      end
+    end
+
+    # white pegs
+    uniques = $code.uniq
+    @guess.each do |colour|
+      count_colour = $code.count(colour)
+      count_black  = @feedback_pegs.count(colour)
+
+      # compare count of black pegs and colour == white pegs.
+      if count_colour - count_black > 0
+        @feedback_pegs << :white
+      end
+    end
   end
 
   def code_generate_choice
@@ -111,19 +151,21 @@ class Code_Breaker
   end
 
   def guess_code
-    if @type == "computer"
+    # if @type == "computer"
       code_guess_randomly
-    elsif @type == "human"
-      code_guess_choice
-    end
+    # elsif @type == "human"
+    #   code_guess_choice
+    # end
   end
 
   def code_guess_randomly
-    @guess = [1,2,3,4]
+    # musn't be the same as a previous guess.
+    # so save each guess into a previous_guesses array, and compare the new one.
+    @guess = code_generate_randomly
   end
 
   def code_guess_choice
-
+    @guess = code_generate_randomly
   end
 
 end

@@ -8,12 +8,39 @@
 # [x] put classes into their own file and import them
 # [x] method to decide how many rounds to play, must be even number
 # [x] method to let code-maker set 4 colours, delete them, edit, etc
+# [x] method to print out your guesses with colours
 # [ ] method to check if the guess matches the code
-# [ ] method to print out your guesses with colours
 
-# 3 difficulty settings for computer: easy (random) mid/high based on an algorithm
+# Breaker:
+# [] Player method to guess a code
+# [] Compute method to guess a code
 
-# config: blanks allowed? duplicates allowed?
+# Maker
+# [] Player method to specify the feedback pegs
+# [] Computer method to specify the feedback pegs
+
+# Game Loop
+# [x] First ask breaker to make a guess
+# [] Check if its correct
+#   [] if not, ask maker to give feedback pegs
+#   [] display feedback pegs on side of board
+#   [] display turn number on board
+#   [] if it is, game over
+
+
+# [] game_array should be of length of number_of_turns
+# [] print game_array to show how many turns are left
+
+# [] generate random guess
+# [] check guess with code
+# [] generate black/white peg feedback
+# [] each turn, the guesses and feedback are added to a
+#   parent array, and displayed in sequence
+
+
+# [] 3 difficulty settings for computer: easy (random) mid/high based on an algorithm
+
+# [] config: blanks allowed? duplicates allowed?
 
 # Import
 require_relative 'src/classes.rb'
@@ -28,7 +55,10 @@ $peg = {
     3 => " 3 ".bg_brown,
     4 => " 4 ".bg_blue,
     5 => " 5 ".bg_magenta,
-    6 => " 6 ".bg_cyan
+    6 => " 6 ".bg_cyan,
+    :black => " B ".bg_black,
+    :white => " W ".bg_gray,
+    nil   => "___",
   }
 $game_over = false
 $rules = " One player is the code-maker and the other is the code-breaker. The code-maker sets
@@ -51,6 +81,7 @@ puts "You chose: #{$number_of_turns} guesses."
 # Code maker starts by making the code
 $player[:maker].make_code
 
+
 # Loop for number_of_turns, code_breaker tries to guess
 puts "\n\n"
 puts "=========="
@@ -58,14 +89,32 @@ puts "Start Game"
 puts "==========\n"
 
 $number_of_turns.times do |x|
+  $total_rounds = x
   puts "\n\n    Round #{x+1}/#{$number_of_turns}"
 
-  puts $game_array
-
+  # Breaker's Turn
   $player[:breaker].guess_code
-  puts "Guess: #{$player[:breaker].guess}"
-  puts "Code: #{$code}"
 
-  $game_over = true if $player[:breaker].guess == $code
+  # Check 
+  $game_over = compare_code_to_guess($player[:breaker].guess)
   break if $game_over == true
+
+  # Display Result
+  $game_array[x] = display_code( $player[:breaker].guess )
+  puts $game_array
+  puts "Guess: #{display_code($player[:breaker].guess)}"
+  puts "Code:  #{display_code($code)}"
+
+  
+  # Maker's Turn
+  $player[:maker].set_pegs
+  # $game_array - add guess to sidebar $player[:maker].feedback_pegs
+  $game_array[x] << display_code($player[:maker].feedback_pegs)
+
+  puts "Guess Failed"
+  puts "Next Round?"
+  gets.chomp
+
 end
+
+puts "Guess correct! Total rounds: #{$total_rounds}"
