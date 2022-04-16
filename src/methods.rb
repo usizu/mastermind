@@ -26,7 +26,7 @@ def compare_code_to_guess(guess)
   return true if $player[:breaker].guess == $code
 end
 
-def player_get_choice
+def player_get_role
   puts "\nPlay as Code Breaker or Code Maker?"
   puts "Press a key: [1: Maker] [2: Breaker]"
   
@@ -34,17 +34,17 @@ def player_get_choice
   
   if player_choice == '1' || player_choice == "" || player_choice == " "
     puts "You choose Code Maker."
-    $human = Code_Maker.new("human")
+    $you = Code_Maker.new("you")
     $computer = Code_Breaker.new("computer")
-    $player = {maker: $human, breaker: $computer}
+    $player = {maker: $you, breaker: $computer}
   elsif player_choice == '2'
     puts "You choose Code Breaker."
-    $human = Code_Breaker.new("human")
+    $you = Code_Breaker.new("you")
     $computer = Code_Maker.new("computer")
-    $player = {maker: $computer, breaker: $human}
+    $player = {maker: $computer, breaker: $you}
   else
     puts "\nInvalid key, please try again."
-    player_get_choice
+    player_get_role
   end
 end
 

@@ -1,6 +1,54 @@
 # Classes
 # ======================================================
 
+module Codes
+  def code_generate_choice(type = 'guess')
+    puts "\n"
+    puts "Choose your #{type}:"
+    puts "=================\n"
+
+    code_finished = false
+    chosen_code = []
+
+    until code_finished == true
+      loop do
+        puts "\nCurrent #{type}: #{display_code(chosen_code)}"
+
+        if chosen_code.length == 4
+          puts "\nConfirm this is your final #{type}? y/n"
+          confirm = gets.chomp
+          if confirm.downcase == 'y' || confirm == ""
+            code_finished = true
+            break
+          else
+            chosen_code.pop
+            next
+          end
+        end
+
+        puts "Type a number to choose a peg. [Pegs: #{display_peg_colour_numbers}]"
+        puts "Press x to remove a peg."
+        choice = gets.chomp
+
+        if $peg.has_key?(choice.to_i)
+          chosen_code << choice.to_i
+          break
+        elsif choice == "x"
+          chosen_code.pop
+          break
+        else
+          puts "\nInvalid character, try again:"
+        end
+      end
+
+    end
+
+    return chosen_code
+  end
+
+end
+
+
 class String
   # Taken from a comment:
   # https://stackoverflow.com/questions/1489183/how-can-i-use-ruby-to-colorize-the-text-output-to-a-terminal
@@ -32,7 +80,9 @@ end
 
 class Code_Maker
 
-  attr_reader :feedback_pegs
+  include Codes
+
+  attr_reader :type, :feedback_pegs
 
   def initialize(type)
     @type = type
@@ -43,14 +93,14 @@ class Code_Maker
     if @type == "computer"
       $code = code_generate_randomly
       puts "The Code: #{display_code}"
-    elsif @type == "human"
-      $code = code_generate_choice
+    elsif @type == "you"
+      $code = code_generate_choice('Code')
       puts "Your Code: #{display_code}"
     end
   end
 
   def set_pegs
-    # human:
+    # you:
       # tells you how many pegs of each colour to put
       # saves these in an array
       # prompts you to set them out
@@ -99,63 +149,24 @@ class Code_Maker
     end
   end
 
-  def code_generate_choice
-    puts "\n"
-    puts "Choose your code:"
-    puts "=================\n"
-
-    code_finished = false
-    
-    until code_finished == true
-      loop do
-        puts "\nCurrent Code: #{display_code}"
-
-        if $code.length == 4
-          puts "\nConfirm this is your final code? y/n"
-          confirm = gets.chomp
-          if confirm.downcase == 'y' || confirm == ""
-            code_finished = true
-            break
-          else
-            $code.pop
-            next
-          end
-        end
-
-        puts "Type a number to choose a peg. [Pegs: #{display_peg_colour_numbers}]"
-        puts "Press x to remove a peg."
-        choice = gets.chomp
-
-        if $peg.has_key?(choice.to_i)
-          $code << choice.to_i
-          break
-        elsif choice == "x"
-          $code.pop
-          break
-        else
-          puts "\nInvalid character, try again:"
-        end
-      end
-
-    end
-  end
-
 end
 
 class Code_Breaker
 
-  attr_reader :guess
+  include Codes
+
+  attr_reader :type, :guess 
 
   def initialize(type)
     @type = type
   end
 
   def guess_code
-    # if @type == "computer"
+    if @type == "computer"
       code_guess_randomly
-    # elsif @type == "human"
-    #   code_guess_choice
-    # end
+    elsif @type == "you"
+      code_guess_choice
+    end
   end
 
   def code_guess_randomly
@@ -165,7 +176,7 @@ class Code_Breaker
   end
 
   def code_guess_choice
-    @guess = code_generate_randomly
+    @guess = code_generate_choice
   end
 
 end

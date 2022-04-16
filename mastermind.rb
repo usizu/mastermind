@@ -72,7 +72,7 @@ the correct sequence of code pegs."
 welcome_message
 
 # Ask player to choose Breaker or Maker
-player_get_choice
+player_get_role
 
 # Ask how many turns the game will last
 player_set_turns
@@ -90,9 +90,10 @@ puts "==========\n"
 
 $number_of_turns.times do |x|
   $total_rounds = x
-  puts "\n\n    Round #{x+1}/#{$number_of_turns}"
+  puts "\n    Round #{x+1}/#{$number_of_turns}"
 
   # Breaker's Turn
+  puts "\n Code Breaker's Turn: (#{$player[:breaker].type.capitalize})"
   $player[:breaker].guess_code
 
   # Check 
@@ -107,6 +108,7 @@ $number_of_turns.times do |x|
 
   
   # Maker's Turn
+  puts "\n Code Maker's Turn: (#{$player[:maker].type.capitalize})"
   $player[:maker].set_pegs
   # $game_array - add guess to sidebar $player[:maker].feedback_pegs
   $game_array[x] << display_code($player[:maker].feedback_pegs)
