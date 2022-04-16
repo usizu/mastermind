@@ -2,48 +2,50 @@
 # ======================================================
 
 module Codes
+
   def code_generate_choice(type = 'guess')
     puts "\n"
     puts "Choose your #{type}:"
     puts "=================\n"
 
+    code_input = []
     code_finished = false
-    chosen_code = []
 
     until code_finished == true
       loop do
-        puts "\nCurrent #{type}: #{display_code(chosen_code)}"
 
-        if chosen_code.length == 4
-          puts "\nConfirm this is your final #{type}? y/n"
+        puts "\nCurrent #{type}: #{display_code(code_input)}"
+
+        # Confirm Final Code?
+        if code_input.length == 4
+          puts "\nConfirm final #{type}? y/n"
           confirm = gets.chomp
           if confirm.downcase == 'y' || confirm == ""
             code_finished = true
             break
           else
-            chosen_code.pop
+            code_input.pop
             next
           end
         end
 
-        puts "Type a number to choose a peg. [Pegs: #{display_peg_colour_numbers}]"
+        # Add or Remove pegs
+        puts "Type your inputs: [Pegs: #{display_pegs}]"
         puts "Press x to remove a peg."
-        choice = gets.chomp
+        choice = gets.chomp.chars.first(4) # cut it to 4 digits
 
-        if $peg.has_key?(choice.to_i)
-          chosen_code << choice.to_i
-          break
-        elsif choice == "x"
-          chosen_code.pop
-          break
-        else
-          puts "\nInvalid character, try again:"
-        end
+        if choice == ["x"] then code_input.pop; break; end
+
+        # keep only peg key inputs
+        choice.map! {|x| x.to_i if $peg_keys.include?(x.to_i) }.delete(nil)
+
+        # save input
+        code_input = (code_input += choice).first(4) # constrain to 4 characters
       end
 
     end
 
-    return chosen_code
+    return code_input
   end
 
 end
@@ -89,7 +91,6 @@ class Code_Maker
   end
 
   def make_code
-    puts "Making code..."
     if @type == "computer"
       $code = code_generate_randomly
       puts "The Code: #{display_code}"
@@ -100,53 +101,33 @@ class Code_Maker
   end
 
   def set_pegs
-    # you:
-      # tells you how many pegs of each colour to put
-      # saves these in an array
-      # prompts you to set them out
-        # can they be set in any order?
-      # each one you put, pops one off the array
-      # method ends when array is empty
-      # then a method shows the pegs on the board
-    # computer:
-      # counts the correct pegs to do, then does them
-
-    # peg rules:
-      # 2 kinds of peg: black and white
-      # 1 black peg for correct colour+position
-      # 1 white peg for correct colour in wrong position
-      # pegs are given for each correct guess
-
     # check_pegs method
     #  returns how many pegs of each type should be set
     check_pegs
-    puts "Peg check: #{display_code(@feedback_pegs)}"
   end
 
   def check_pegs
-    @feedback_pegs = []
     @guess = $player[:breaker].guess
+    @code_copy = $code.clone
+    @feedback_pegs = []
 
-    # black pegs
+    # black pegs check...
     @guess.each_with_index do |colour, position|
-      puts "colour: #{colour} | pos: #{position}"
-      if $code[position] == colour
-        puts "match (#{position})"
+      if @code_copy[position] == colour
         @feedback_pegs << :black
+        @code_copy[position] = nil
       end
     end
 
-    # white pegs
-    uniques = $code.uniq
-    @guess.each do |colour|
-      count_colour = $code.count(colour)
-      count_black  = @feedback_pegs.count(colour)
-
-      # compare count of black pegs and colour == white pegs.
-      if count_colour - count_black > 0
+    # white pegs check...
+    @guess.each_with_index do |colour, position|
+      if @code_copy.include?(colour)
         @feedback_pegs << :white
+        @code_copy[position] = nil
       end
     end
+
+    @feedback_pegs.shuffle! # shuffle because peg position is arbitrary
   end
 
 end

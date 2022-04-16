@@ -9,34 +9,30 @@
 # [x] method to decide how many rounds to play, must be even number
 # [x] method to let code-maker set 4 colours, delete them, edit, etc
 # [x] method to print out your guesses with colours
-# [ ] method to check if the guess matches the code
 
 # Breaker:
-# [] Player method to guess a code
-# [] Compute method to guess a code
+# [x] Player method to guess a code
+# [x] Compute method to guess a code
+#   [x] level 1 random
+#   [] level 2 mid - it will always use a black again
+#   [] level 3 hard - 50% chance it will correctly insert a black.
+    # if the computer has guessed the right color but the wrong position,
+    # its next guess will need to include that color somewhere.
 
 # Maker
-# [] Player method to specify the feedback pegs
-# [] Computer method to specify the feedback pegs
+# [x] Player method to specify the feedback pegs
+#   [] method to choose which pegs to place
+#   [] can be an extension of the method to choose a code
+# [x] Computer method to specify the feedback pegs
 
 # Game Loop
 # [x] First ask breaker to make a guess
-# [] Check if its correct
-#   [] if not, ask maker to give feedback pegs
-#   [] display feedback pegs on side of board
-#   [] display turn number on board
-#   [] if it is, game over
+# [x] Check if its correct
+#   [x] display feedback pegs on side of board
+#   [x] display turn number on board
+#   [x] if it is, game over
 
-
-# [] game_array should be of length of number_of_turns
-# [] print game_array to show how many turns are left
-
-# [] generate random guess
-# [] check guess with code
-# [] generate black/white peg feedback
-# [] each turn, the guesses and feedback are added to a
-#   parent array, and displayed in sequence
-
+# show board after win
 
 # [] 3 difficulty settings for computer: easy (random) mid/high based on an algorithm
 
@@ -60,10 +56,22 @@ $peg = {
     :white => " W ".bg_gray,
     nil   => "___",
   }
-$game_over = false
-$rules = " One player is the code-maker and the other is the code-breaker. The code-maker sets
-a code of four code pegs, from a set of six colours. The code-breaker has to guess
-the correct sequence of code pegs."
+$peg_keys = $peg.first(6).map {|key, val| key}
+
+white = "White".bg_gray
+black = "Black".bg_black
+
+$rules = "This is a one player game against the computer. You can play as either the
+Code Maker or Code Breaker.
+
+The Code Maker sets a four-digit code using six-coloured pegs [ #{display_pegs} ],
+and the Code Breaker has to guess it within a set number of turns. 
+
+After the Breaker's guess, the Maker gives them clues via Black or White pegs,
+to let them know which ones they got correct:
+
+- A #{black} Peg for each correct guess of position and colour.
+- A #{white} Peg for each correct guess of colour but with wrong position."
 
 
 # Game Starts
@@ -73,14 +81,15 @@ welcome_message
 
 # Ask player to choose Breaker or Maker
 player_get_role
+$winner = $player[:maker] # defaults to maker unless breaker gets it.
 
 # Ask how many turns the game will last
 player_set_turns
+build_game_array
 puts "You chose: #{$number_of_turns} guesses."
 
 # Code maker starts by making the code
 $player[:maker].make_code
-
 
 # Loop for number_of_turns, code_breaker tries to guess
 puts "\n\n"
@@ -93,30 +102,31 @@ $number_of_turns.times do |x|
   puts "\n    Round #{x+1}/#{$number_of_turns}"
 
   # Breaker's Turn
-  puts "\n Code Breaker's Turn: (#{$player[:breaker].type.capitalize})"
+  puts "\n Code Breaker's Turn (#{$player[:breaker].type.capitalize}):"
   $player[:breaker].guess_code
-
-  # Check 
-  $game_over = compare_code_to_guess($player[:breaker].guess)
-  break if $game_over == true
-
-  # Display Result
   $game_array[x] = display_code( $player[:breaker].guess )
-  puts $game_array
-  puts "Guess: #{display_code($player[:breaker].guess)}"
-  puts "Code:  #{display_code($code)}"
 
-  
+  # Check Breaker's Guess
+  if compare_code_to_guess($player[:breaker].guess) == true
+    $winner = $player[:breaker]
+    break
+  end
+
   # Maker's Turn
-  puts "\n Code Maker's Turn: (#{$player[:maker].type.capitalize})"
+  puts "\n Code Maker's Turn (#{$player[:maker].type.capitalize}):"
   $player[:maker].set_pegs
-  # $game_array - add guess to sidebar $player[:maker].feedback_pegs
+  
+  # Update Game Board with Result
   $game_array[x] << display_code($player[:maker].feedback_pegs)
+  puts $game_array
+  puts "  Code  "
+  puts display_code($code)
 
-  puts "Guess Failed"
-  puts "Next Round?"
+  # Prompt for next turn 
+  # [] only prompt if computer is guessing
+  puts "Next Turn (#{x})... (any key)"
   gets.chomp
 
 end
 
-puts "Guess correct! Total rounds: #{$total_rounds}"
+puts "Winner: #{$winner.type.capitalize}. Total rounds: #{$total_rounds}"
